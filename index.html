@@ -195,6 +195,32 @@
 
   .entry a:hover { color: var(--clay); border-color: var(--clay); }
 
+  .entry-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .delete-btn {
+    all: unset;
+    cursor: pointer;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font-size: 16px;
+    line-height: 1;
+  }
+
+  .delete-btn:hover {
+    background: #fbe9e9;
+    color: #c0392b;
+  }
+
   .empty {
     text-align: center;
     color: var(--muted);
@@ -266,7 +292,7 @@
 
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import {
-    getFirestore, collection, addDoc, getDocs, query, orderBy
+    getFirestore, collection, addDoc, getDocs, query, orderBy, doc, deleteDoc
   } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
   const app = initializeApp(firebaseConfig);
@@ -308,11 +334,15 @@
     }
   }
 
+  // ⚠️ Simple deterrent only — not real security. Anyone who views this page's
+  // source code could find this value. Good enough to stop casual deletions.
+  const ADMIN_PASSWORD = "Rickynet123";
+
   async function getEntries() {
     try {
       const q = query(entriesCol, orderBy("name"));
       const snapshot = await getDocs(q);
-      return snapshot.docs.map(doc => doc.data());
+      return snapshot.docs.map(d => ({ ...d.data(), id: d.id }));
     } catch (e) {
       console.error(e);
       return [];
@@ -321,6 +351,10 @@
 
   async function addEntry(entry) {
     await addDoc(entriesCol, entry);
+  }
+
+  async function deleteEntry(id) {
+    await deleteDoc(doc(db, "linkedin-entries", id));
   }
 
   submitBtn.addEventListener('click', async () => {
@@ -422,8 +456,32 @@
         link.rel = 'noopener noreferrer';
         link.textContent = 'Open profile →';
 
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'delete-btn';
+        deleteBtn.textContent = '✕';
+        deleteBtn.title = 'Remove from list';
+        deleteBtn.addEventListener('click', async () => {
+          const input = prompt('Enter admin password to remove ' + e.name + ':');
+          if (input === null) return;
+          if (input !== ADMIN_PASSWORD) {
+            alert('Incorrect password.');
+            return;
+          }
+          try {
+            await deleteEntry(e.id);
+            loadEntries();
+          } catch (err) {
+            alert('Something went wrong removing this entry.');
+          }
+        });
+
+        const right = document.createElement('div');
+        right.className = 'entry-right';
+        right.appendChild(link);
+        right.appendChild(deleteBtn);
+
         row.appendChild(left);
-        row.appendChild(link);
+        row.appendChild(right);
         entriesEl.appendChild(row);
       });
   }
