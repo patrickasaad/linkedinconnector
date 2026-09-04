@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Intern Connect</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap');
+
+  :root {
+    --ink: #0f2a1f;
+    --cream: #f2ede0;
+    --paper: #101d16;
+    --field: #eef0e6;
+    --card: #ffffff;
+    --moss: #1e4b34;
+    --clay: #e8a13d;
+    --line: #d7d2c2;
+    --muted: #6c766e;
+    --muted-onpage: #a9b3aa;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--cream);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding: 32px 20px 60px;
+  }
+
+  .wrap {
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  header {
+    margin-bottom: 28px;
+  }
+
+  .kicker {
+    font-size: 13px;
+    color: var(--clay);
+    margin: 0 0 6px;
+    font-weight: 500;
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-size: 30px;
+    font-weight: 600;
+    margin: 0 0 10px;
+    line-height: 1.15;
+  }
+
+  p.sub {
+    color: var(--muted-onpage);
+    font-size: 15px;
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  .card {
+    background: var(--card);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 24px;
+    margin-top: 24px;
+  }
+
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--moss);
+    margin-bottom: 6px;
+  }
+
+  input[type="text"], input[type="url"] {
+    width: 100%;
+    padding: 11px 12px;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    font-size: 15px;
+    font-family: inherit;
+    background: var(--field);
+    color: var(--ink);
+    margin-bottom: 16px;
+  }
+
+  input:focus {
+    outline: none;
+    border-color: var(--moss);
+  }
+
+  button {
+    width: 100%;
+    padding: 12px;
+    background: var(--moss);
+    color: #fff;
+    border: none;
+    border-radius: 3px;
+    font-size: 15px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+  }
+
+  button:hover { background: #2c433e; }
+  button:disabled { background: #a8b0ae; cursor: default; }
+
+  .status {
+    margin-top: 14px;
+    font-size: 14px;
+    text-align: center;
+    min-height: 20px;
+  }
+
+  .status.ok { color: var(--moss); }
+  .status.err { color: var(--clay); }
+
+  .toggle {
+    text-align: center;
+    margin-top: 26px;
+  }
+
+  .toggle button {
+    all: unset;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--muted-onpage);
+    text-decoration: underline;
+  }
+
+  .list-view { display: none; }
+  .list-view.active { display: block; }
+  .form-view.hidden { display: none; }
+
+  .count {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  .entry {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .entry:last-child { border-bottom: none; }
+
+  .entry-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+  }
+
+  .avatar {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .entry-name {
+    font-size: 15px;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .entry a {
+    font-size: 13px;
+    color: var(--moss);
+    text-decoration: none;
+    border-bottom: 1px solid var(--moss);
+    white-space: nowrap;
+    margin-left: 12px;
+  }
+
+  .entry a:hover { color: var(--clay); border-color: var(--clay); }
+
+  .empty {
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
+    padding: 30px 0;
+  }
+
+  .note {
+    font-size: 12.5px;
+    color: var(--muted-onpage);
+    margin-top: 18px;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="form-view" id="formView">
+    <header>
+      <p class="kicker">Group chat roster</p>
+      <h1>Drop your LinkedIn here</h1>
+      <p class="sub">Everyone adds their profile once. One person can then work through the list and send connection requests — no need to ask around one by one.</p>
+    </header>
+
+    <div class="card">
+      <label for="name">Your name</label>
+      <input type="text" id="name" placeholder="Jane Doe" autocomplete="name">
+
+      <label for="url">LinkedIn profile URL</label>
+      <input type="url" id="url" placeholder="https://www.linkedin.com/in/janedoe" autocomplete="url">
+
+      <button id="submitBtn">Add me to the list</button>
+      <div class="status" id="status"></div>
+    </div>
+
+    <p class="note">Names and links here are visible to everyone who opens this page — just like a shared sign-up sheet.</p>
+
+    <div class="toggle"><button id="showList">See who's on the list →</button></div>
+  </div>
+
+  <div class="list-view" id="listView">
+    <header>
+      <p class="kicker">Group chat roster</p>
+      <h1>Everyone so far</h1>
+      <p class="sub">Open each profile and send the request — you're still the one clicking connect.</p>
+    </header>
+
+    <div class="card">
+      <div class="count" id="count">Loading…</div>
+      <div id="entries"></div>
+    </div>
+
+    <div class="toggle"><button id="showForm">← Add your own profile</button></div>
+  </div>
+
+</div>
+
+<script type="module">
+  // ⚠️ Paste your own Firebase project config here (see instructions provided separately).
+  const firebaseConfig = {
+    apiKey: "AIzaSyD5OYhGtszJDVEnheumBuu_gmSCLh9nlMw",
+    authDomain: "linkedinconnector-ca71d.firebaseapp.com",
+    projectId: "linkedinconnector-ca71d",
+    storageBucket: "linkedinconnector-ca71d.firebasestorage.app",
+    messagingSenderId: "575382857368",
+    appId: "1:575382857368:web:3a0fbedf494a15833112ed"
+  };
+
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import {
+    getFirestore, collection, addDoc, getDocs, query, orderBy
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const entriesCol = collection(db, "linkedin-entries");
+
+  const formView = document.getElementById('formView');
+  const listView = document.getElementById('listView');
+  const nameInput = document.getElementById('name');
+  const urlInput = document.getElementById('url');
+  const submitBtn = document.getElementById('submitBtn');
+  const statusEl = document.getElementById('status');
+  const entriesEl = document.getElementById('entries');
+  const countEl = document.getElementById('count');
+
+  document.getElementById('showList').addEventListener('click', () => {
+    formView.classList.add('hidden');
+    listView.classList.add('active');
+    loadEntries();
+  });
+
+  document.getElementById('showForm').addEventListener('click', () => {
+    listView.classList.remove('active');
+    formView.classList.remove('hidden');
+  });
+
+  function normalizeUrl(raw) {
+    let v = raw.trim();
+    if (!/^https?:\/\//i.test(v)) v = 'https://' + v;
+    return v;
+  }
+
+  function isLikelyLinkedIn(url) {
+    try {
+      const u = new URL(url);
+      return u.hostname.includes('linkedin.com');
+    } catch {
+      return false;
+    }
+  }
+
+  async function getEntries() {
+    try {
+      const q = query(entriesCol, orderBy("name"));
+      const snapshot = await getDocs(q);
+      return snapshot.docs.map(doc => doc.data());
+    } catch (e) {
+      console.error(e);
+      return [];
+    }
+  }
+
+  async function addEntry(entry) {
+    await addDoc(entriesCol, entry);
+  }
+
+  submitBtn.addEventListener('click', async () => {
+    const name = nameInput.value.trim();
+    const rawUrl = urlInput.value.trim();
+
+    if (!name || !rawUrl) {
+      statusEl.textContent = 'Fill in both fields.';
+      statusEl.className = 'status err';
+      return;
+    }
+
+    const url = normalizeUrl(rawUrl);
+    if (!isLikelyLinkedIn(url)) {
+      statusEl.textContent = "That doesn't look like a LinkedIn URL.";
+      statusEl.className = 'status err';
+      return;
+    }
+
+    submitBtn.disabled = true;
+    statusEl.textContent = 'Adding you…';
+    statusEl.className = 'status';
+
+    try {
+      const entries = await getEntries();
+      const already = entries.some(e => e.url.toLowerCase() === url.toLowerCase());
+      if (already) {
+        statusEl.textContent = "You're already on the list.";
+        statusEl.className = 'status ok';
+      } else {
+        await addEntry({ name, url, addedAt: Date.now() });
+        statusEl.textContent = "Added! You're on the list.";
+        statusEl.className = 'status ok';
+        nameInput.value = '';
+        urlInput.value = '';
+      }
+    } catch (e) {
+      statusEl.textContent = 'Something went wrong — try again.';
+      statusEl.className = 'status err';
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
+
+  const AVATAR_COLORS = ['#1e4b34', '#b5623a', '#3d5a80', '#8a4f7d', '#4a6b3a', '#c17817', '#5b4b8a'];
+
+  function getInitials(name) {
+    const parts = name.trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 0) return '?';
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  }
+
+  function getAvatarColor(name) {
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+      hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+  }
+
+  async function loadEntries() {
+    countEl.textContent = 'Loading…';
+    entriesEl.innerHTML = '';
+    const entries = await getEntries();
+
+    if (entries.length === 0) {
+      countEl.textContent = 'No one yet.';
+      entriesEl.innerHTML = '<div class="empty">Be the first to add your profile.</div>';
+      return;
+    }
+
+    countEl.textContent = entries.length + (entries.length === 1 ? ' person' : ' people') + ' on the list';
+    entries
+      .slice()
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .forEach(e => {
+        const row = document.createElement('div');
+        row.className = 'entry';
+
+        const left = document.createElement('div');
+        left.className = 'entry-left';
+
+        const avatar = document.createElement('div');
+        avatar.className = 'avatar';
+        avatar.style.background = getAvatarColor(e.name);
+        avatar.textContent = getInitials(e.name);
+
+        const nameEl = document.createElement('span');
+        nameEl.className = 'entry-name';
+        nameEl.textContent = e.name;
+
+        left.appendChild(avatar);
+        left.appendChild(nameEl);
+
+        const link = document.createElement('a');
+        link.href = e.url;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.textContent = 'Open profile →';
+
+        row.appendChild(left);
+        row.appendChild(link);
+        entriesEl.appendChild(row);
+      });
+  }
+</script>
+</body>
+</html>
